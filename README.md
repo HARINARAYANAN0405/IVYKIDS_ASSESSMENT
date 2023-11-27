@@ -1,64 +1,75 @@
-# Telco-customer-churn-prediction
-A classification machine learning problem for predicting customers churn from the company based on customers who left within the last month labeled by 'yes' or 'no'
+# Telco Customer Churn Prediction
 
-The dataset used in this project is obtained from [Kaggle - Telco Customer Churn](https://www.kaggle.com/blastchar/telco-customer-churn)\
-The data set includes information about:
-- Customers who left within the last month – the column is called Churn
-- Services that each customer has signed up for – phone, multiple lines, internet, online security, online backup, device protection, tech support, and streaming TV and movies.
-- Customer account information – how long they’ve been a customer, contract, payment method, paperless billing, monthly charges, and total charges
-- Demographic info about customers – gender, age range, and if they have partners and dependents
+This project addresses a classification machine learning task focused on predicting customer churn in a telecommunications company. Churn is identified based on whether customers left within the last month, labeled as 'yes' or 'no.'
+
+The dataset utilized for this project is sourced from [Kaggle - Telco Customer Churn](https://www.kaggle.com/blastchar/telco-customer-churn). It encompasses information such as:
+
+- Customers who left within the last month (Churn column)
+- Services subscribed by each customer, including phone, multiple lines, internet, online security, online backup, device protection, tech support, and streaming TV and movies.
+- Customer account details such as tenure, contract, payment method, paperless billing, monthly charges, and total charges.
+- Demographic information like gender, age range, and the presence of partners and dependents.
 
 ## Methodology
-At first 20% of the data were splitted for final testing; stratified by the 'Churn' (target) column.
+Initially, 20% of the data was reserved for final testing, stratified by the 'Churn' (target) column.
 
-## Data cleaning
-* Convert 'TotalCharges' column which is of object type to float type using pd.to_numeric() with errors parameter set to 'coerce' to parse invalid data to NaN.
-* Eight missing values were found in the 'TotalCharges' column and were imputed by the mean() value.
-* Data has no duplicates.
+## Data Cleaning
+- Converted the 'TotalCharges' column from object type to float type using `pd.to_numeric()` with errors parameter set to 'coerce' to parse invalid data to NaN.
+- Imputed eight missing values in the 'TotalCharges' column with the mean() value.
+- Verified absence of duplicates in the data.
 
-## Exploratory data analysis
-1. Count plot shows the distribution of the churn rate in the data which showed an imbalance in the data.
-2. Categorical features count plot insights:
-    * Data is evenly distributed between the two genders; males and females, which might be useful in further analysis.
-    * No information added by 'No Internet Service' or 'No Phone Service' and 'No' categories.
-    --> **Replacing 'No Internet Service' and 'No Phone Service' entries with 'No'**.
-3. Histogram and box plot of continous features implies that:
-    * No outliers exists.
-    * 'TotalCharges' feature is right skewed.
-4. Scatter plot of 'MonthlyCharges' vs. 'TotalCharges' shows a positive correlation between both and also it affects the Churn rate positively.
+## Exploratory Data Analysis
+1. A count plot highlighted an imbalance in the distribution of churn rates.
+2. Categorical feature count plots provided insights, such as even gender distribution and redundant information in categories like 'No Internet Service' and 'No Phone Service,' which were replaced with 'No.'
+3. Histograms and box plots of continuous features revealed no outliers and a right-skewed 'TotalCharges' feature.
+4. A scatter plot of 'MonthlyCharges' vs. 'TotalCharges' indicated a positive correlation, affecting the churn rate positively.
 
-## Feature encoding 
-Several encoding techniques were tested on each categorical feature separately and One-Hot encoding all the categorical features gave the best results.
+## Feature Encoding
+Tested various encoding techniques, and One-Hot encoding on all categorical features yielded the best results.
 
-## Feature engineering
-Binning 'tenure' feature into 6 ranges:
-* 0-12 months --> '0-1 years'
-* 12-24 months --> '1-2 years'
-* 24-36 months --> '2-3 years'
-* 36-48 months --> '3-4 years'
-* 48-60 months --> '4-5 years'
-* More than 60 months --> 'more than 5 years'
+## Feature Engineering
+Binned the 'tenure' feature into six ranges to enhance its interpretability.
 
-## Feature scaling
-log transformation is very powerful in feature scaling specially with skewed data, hence, np.log1p() is applied on 'MonthlyCharges' and 'TotalCharges' features and with trials it proved giving the best results over MinMaxScaler() and StandaredScaler().
+## Feature Scaling
+Applied log transformation, specifically `np.log1p()`, to 'MonthlyCharges' and 'TotalCharges' due to their skewed distribution, proving superior to MinMaxScaler() and StandardScaler().
 
-## Data imbalance
-Data imbalance affects machine learning models by tending only to predict the majority class and ignoting the minority class, hence, having major misclassification of the minority class in comparison with the majority class. Hence, we use techniques to balance class distribution in the data.
+## Data Imbalance
+Addressed potential class imbalance using the SMOTE (Synthetic Minority Oversampling Technique) library to synthetically increase the minority class ('yes').
 
-Even that our data here doesn't have severe class imbalance, but handling it shows results improvement.
-Using SMOTE (Synthetic Minority Oversampling Technique) libraray in python that randomly increasing the minority class which is 'yes' in our case.
+## Preprocessing Function
+Developed a Python function, `test_prep(dataframe)`, to combine and apply all previous preprocessing steps to test data, handling missing values based on the mean value in the training set.
 
-SMOTE synthetically creates new records of the minority class by randomly selecting one or more of the k-nearest neighbors for each example in the minority class. Here, k= 5 neighbors is used. 
+## Models Training
+Four models were trained and evaluated, with results reported using confusion matrices and classification reports:
 
-### Preparing a python function test_prep(dataframe) to combine and apply all previous preprocessing steps on the test data.
-- To handle any expected missing values in the test set, a condition is added inside the function to map the mean value of its column in the train set.
+1. Logistic Regression with best parameters: C=200, max_iter=1000.
+2. Support Vector Classifier with best parameters: kernel='linear', C=20.
+3. XGBoost Classifier with hyperparameters tuned using RandomizedSearchCV and StratifiedKFold.
+4. Multi-layer Perceptron (MLP) Classifier.
 
-## Models training
-Four different models were applied on the data and all results are reported with confusion matrix and classification report showing the precision, recall, and f1-score metrics.
-1. Logistic regression
-Best parameters after several trials: C=200 (very large c value trying to fit the data as possible without overfitting), max_iter=1000
-2. Support vector classifier
-Best prameters: kernel='linear', C=20
-3. XGBoost classifier
-RandomizedSearchCV is used for hyperparameters tuning with StratifiedKFold of 5 splits.
-4. Multi-layer Perceptron (MLP) classifier.
+```python
+# Sample code for logistic regression
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, classification_report
+
+# Assuming 'X' is the feature matrix and 'y' is the target variable
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+
+# Instantiate the logistic regression model with best parameters
+logreg_model = LogisticRegression(C=200, max_iter=1000)
+
+# Fit the model
+logreg_model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = logreg_model.predict(X_test)
+
+# Evaluate the model
+conf_matrix = confusion_matrix(y_test, y_pred)
+class_report = classification_report(y_test, y_pred)
+
+print("Confusion Matrix:\n", conf_matrix)
+print("\nClassification Report:\n", class_report)
+```
+
+Repeat similar code structure for other models mentioned in the project.
